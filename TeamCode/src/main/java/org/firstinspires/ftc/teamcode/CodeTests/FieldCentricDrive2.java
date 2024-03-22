@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.CodeTests;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
@@ -24,6 +25,9 @@ public class FieldCentricDrive2 extends LinearOpMode{
         backLeftMotor = hardwareMap.get(DcMotor.class, "backLeftMotor");
         backRightMotor = hardwareMap.get(DcMotor.class, "backRightMotor");
 
+        frontLeftMotor.setDirection(DcMotorSimple.Direction.REVERSE);
+        backLeftMotor.setDirection(DcMotorSimple.Direction.REVERSE);
+
         //Set the Motors to run using the Encoders
         frontLeftMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         frontRightMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
@@ -44,32 +48,32 @@ public class FieldCentricDrive2 extends LinearOpMode{
         //Initialize the IMU
         imu.initialize(parameters);
 
-        //Define movement doubles
-        double ly = gamepad1.left_stick_y;
-        double lx = gamepad1.left_stick_x;
-        double rx = gamepad1.right_stick_x;
-
-        //Define the Bot Heading
-        double botHeading  = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
-
-        // Rotate the movement direction counter to the bots rotation
-        double rotX = lx * Math.cos(-botHeading) - ly * Math.sin(-botHeading);
-        double rotY = lx * Math.cos(-botHeading) + ly * Math.sin(-botHeading);
-
-        // Denominator is the largest motor power (absolute value) or 1
-        // This ensures all the powers maintain the same ratio,
-        // but only if at least one is out of the range [-1, 1]
-        double denominator = Math.max(Math.abs(rotY) + Math.abs(rotX) + Math.abs(rx), 1);
-        double frontLeftPower = (rotY + rotX + rx) / denominator;
-        double backLeftPower = (rotY - rotX + rx) / denominator;
-        double frontRightPower = (rotY - rotX - rx) / denominator;
-        double backRightPower = (rotY + rotX - rx) / denominator;
-
         waitForStart();
         if (opModeIsActive()) {
             while (opModeIsActive()) {
 
-                if (ly > .2 || ly < -.2 || lx > .2 || lx < -.2 || rx > .2 || rx < -.2) {
+                //Define movement doubles
+                double ly = -gamepad1.left_stick_y;
+                double lx = gamepad1.left_stick_x;
+                double rx = gamepad1.right_stick_x;
+
+                //Define the Bot Heading
+                double botHeading  = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
+
+                // Rotate the movement direction counter to the bots rotation
+                double rotX = lx * Math.cos(-botHeading) - ly * Math.sin(-botHeading);
+                double rotY = lx * Math.cos(-botHeading) + ly * Math.sin(-botHeading);
+
+                // Denominator is the largest motor power (absolute value) or 1
+                // This ensures all the powers maintain the same ratio,
+                // but only if at least one is out of the range [-1, 1]
+                double denominator = Math.max(Math.abs(rotY) + Math.abs(rotX) + Math.abs(rx), 1);
+                double frontLeftPower = (rotY + rotX + rx) / denominator;
+                double backLeftPower = (rotY - rotX + rx) / denominator;
+                double frontRightPower = (rotY - rotX - rx) / denominator;
+                double backRightPower = (rotY + rotX - rx) / denominator;
+
+                if (ly > .02 || ly < -.02 || lx > .02 || lx < -.02 || rx > .02 || rx < -.02) {
                     frontLeftMotor.setPower(frontLeftPower);
                     frontRightMotor.setPower(frontRightPower);
                     backLeftMotor.setPower(backLeftPower);
